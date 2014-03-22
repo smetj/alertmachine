@@ -1,0 +1,15 @@
+---
+condition:
+    alert_type: =:host
+    hostgroupnames: in:production
+    hostgroupnames: in:noc
+    hostgroupnames: in:alert_email
+
+queue:
+    - email:
+        from: monitoring@your_company.local
+        to:
+            - noc@your_company.local
+        subject: Alert - Host  {{ hostname }} is  {{ hoststate }}.
+        template: host_email_alert
+...
