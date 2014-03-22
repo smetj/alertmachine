@@ -1,0 +1,13 @@
+Serivce notification.
+
+Hostname                        : {% set hostname=hostname or "Unknown" %}{{ hostname }}
+IP                              : {% set hostaddress=hostaddress or "Unknown" %}{{ hostaddress }}
+Service                         : {% set service_display_name=service_display_name or "Unknown" %}{{ service_display_name }}
+Service Status                  : {% set servicestate=servicestate or "Unknown" %}{{ servicestate }}
+Notification Type               : {% set hoststate=hoststate or "Unknown" %}{{ hoststate }}
+Time                            : {% set longdatetime=longdatetime or "Unknown" %}{{ longdatetime }}
+Host State                      : {% set hoststate=hoststate or "Unknown" %}{{ hoststate }}
+
+Additional Info :
+
+        {% set plugin_output=plugin_output or "Unknown" %}{{ plugin_output }}
