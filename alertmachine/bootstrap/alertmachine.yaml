@@ -21,10 +21,10 @@ modules:
             location: templates/
             header_templates: ["subject"]
 
-    # email:
-    #     module: wishbone.output.email
-    #     arguments:
-    #         key: match_engine
+    email:
+        module: wishbone.output.email
+        arguments:
+            key: match_engine
 
     stdout:
         module: wishbone.builtin.output.stdout
