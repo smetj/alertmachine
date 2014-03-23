@@ -1,9 +1,10 @@
 ---
 condition:
-    alert_type: =:host
+    alert_type: re:host
     hostgroupnames: in:production
     hostgroupnames: in:noc
     hostgroupnames: in:alert_email
+    longdatetime: re:^(Mon|Tue|Wed|Thu|Fri).*
 
 queue:
     - email:

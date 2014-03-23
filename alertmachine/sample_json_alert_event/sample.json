@@ -1,0 +1,13 @@
+{
+   "alert_type":"host",
+   "hostgroupnames":[
+      "production",
+      "noc",
+      "alert_email"
+   ],
+   "longdatetime":"Fri Mar 21 15:30:28 CET 2014",
+   "hostname":"some_host_001.local",
+   "hoststate":"DOWN",
+   "hostaddress":"127.0.0.1",
+   "plugin_output":"PING ok - Packet loss = 0%, RTA = 0.80 ms."
+}

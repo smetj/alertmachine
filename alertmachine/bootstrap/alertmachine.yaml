@@ -1,8 +1,21 @@
 ---
 modules:
 
-    incoming_events:
+    input_udp:
         module: wishbone.input.udp
+        arguments:
+            port: 19283
+
+    input_gearman:
+        module: wishbone.input.gearman
+        arguments:
+            hostlist:
+                - localhost:4730
+            secret: somegearmansecret
+            queue: alert_event
+
+    funnel:
+        module: wishbone.builtin.flow.funnel
 
     validate:
         module: wishbone.function.json
@@ -19,12 +32,14 @@ modules:
         arguments:
             key: match_engine
             location: templates/
-            header_templates: ["subject"]
+            header_templates:
+                - subject
 
     email:
         module: wishbone.output.email
         arguments:
             key: match_engine
+            mta: localhost:25
 
     stdout:
         module: wishbone.builtin.output.stdout
@@ -32,8 +47,10 @@ modules:
             complete: true
 
 routingtable:
-  - incoming_events.outbox      -> validate.inbox
+  - input_udp.outbox            -> funnel.one
+  - input_gearman.outbox        -> funnel.two
+  - funnel.outbox               -> validate.inbox
   - validate.outbox             -> match_engine.inbox
   - match_engine.email          -> template.inbox
-  - template.outbox             -> stdout.inbox
+  - template.outbox             -> email.inbox
 ...
