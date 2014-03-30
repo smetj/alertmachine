@@ -25,13 +25,13 @@ modules:
     match_engine:
         module: pyseps.sequentialmatch
         arguments:
-            location: rules/
+            location: /share/alertmachine/rules/
 
     template:
         module: wishbone.function.template
         arguments:
             key: match_engine
-            location: templates/
+            location: /share/alertmachine/templates
             header_templates:
                 - subject
 
