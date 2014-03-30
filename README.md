@@ -14,9 +14,11 @@ Installation
 
     $ pip install -U pyseps
     $ pip install -U wb_input_udp
+    $ pip install -U wb_input_gearman
     $ pip install -U wb_function_json
     $ pip install -U wb_function_template
     $ pip install -U wb_output_email
+    $ pip install -U wb_input_gearman
 
 
 Nagios/Naemon configuration
