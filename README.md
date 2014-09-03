@@ -13,12 +13,6 @@ Installation
 ============
 
     $ pip install -U pyseps
-    $ pip install -U wb_input_udp
-    $ pip install -U wb_input_gearman
-    $ pip install -U wb_function_json
-    $ pip install -U wb_function_template
-    $ pip install -U wb_output_email
-    $ pip install -U wb_input_gearman
 
 
 Nagios/Naemon configuration
@@ -53,5 +47,10 @@ Usage
 
     $ wishbone start --config /etc/alertmachine.yaml
 
+or alternatively, if you have the alertmachine docker container available:
+
+    $ docker run -i -t --privileged --rm -p 19283:19283/udp \
+      -v /home/smetj/data/projects/github/alertmachine/alertmachine:/share/alertmachine \
+      smetj/wishbone:alertmachine debug --config /share/alertmachine/bootstrap/alertmachine.yaml
 
 

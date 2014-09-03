@@ -7,6 +7,7 @@ use Getopt::Long;
 use Monitoring::Livestatus;
 use JSON;
 use UUID::Tiny ':std';
+use Sys::Syslog;
 
 my $livestatus      = "/var/lib/livestatus/livestatus.sock";
 my $queue           = "alert_event";
@@ -85,55 +86,66 @@ sub QueryLivestatus{
     return $ls_result;
 }
 
+eval {
+    # Query Livestatus for host/service object properties
+    #####################################################
+    my $livestatus_reply = &QueryLivestatus();
 
-# Query Livestatus for host/service object properties
-#####################################################
-my $livestatus_reply = &QueryLivestatus();
+    # some $json cleanup
+    ####################
+    $json =~ s/\n/\\n/gm;
 
-# Merge $livestatus_reply with JSON provided through --json
-###########################################################
-my $cli_json = from_json($json);
-$result = { %$livestatus_reply, %$cli_json };
+    # Merge $livestatus_reply with JSON provided through --json
+    ###########################################################
+    my $cli_json = from_json($json);
+    $result = { %$livestatus_reply, %$cli_json };
 
-# Add a UUID4 to the event
-##########################
-$result-> { "uuid" } = uuid_to_string(create_uuid(UUID_V4));
+    # Add a UUID4 to the event
+    ##########################
+    $result-> { "uuid" } = uuid_to_string(create_uuid(UUID_V4));
 
-# Convert to string
-###################
-$result = to_json($result);
+    # Convert to string
+    ###################
+    $result = to_json($result);
 
-# Submit to destination
-#######################
+    # Submit to destination
+    #######################
 
-if ( $destination =~ /^gearmand:\/\/(.*)/ ){
-    if ( $queue eq "" ){
-        print "When sending results to Gearmand you need to set the queue name.\n\n";
+    if ( $destination =~ /^gearmand:\/\/(.*)/ ){
+        if ( $queue eq "" ){
+            print "When sending results to Gearmand you need to set the queue name.\n\n";
+            &HelpMessage;
+            exit 1;
+        }
+        my $client = Gearman::Client->new;
+        $client->job_servers($1);
+        my $c = $client->dispatch_background($queue,$result);
+        if ($c eq "0"){
+            print "Failed to submit alert event to Gearman.\n";
+            exit 1;
+        }
+        close($client);
+    }
+    elsif ( $destination =~ /^udp:\/\/(.*)/ ){
+        use IO::Socket;
+        my ($host, $port) = split(/:/,$1);
+        my $sock = IO::Socket::INET->new(
+            Proto    => 'udp',
+            PeerPort => $port,
+            PeerAddr => $host,
+        ) or die "Could not create socket: $!\n";
+        $sock->send($result."\n") or die "Send error: $!\n";
+        # close($sock);
+    }
+    else {
+        print "--destination value not correct.\n\n";
         &HelpMessage;
         exit 1;
     }
-    my $client = Gearman::Client->new;
-    $client->job_servers($1);
-    my $c = $client->dispatch_background($queue,$result);
-    if ($c eq "0"){
-        print "Failed to submit alert event to Gearman.\n";
-        exit 1;
-    }
-}
-elsif ( $destination =~ /^udp:\/\/(.*)/ ){
-    use IO::Socket;
-    my ($host, $port) = split(/:/,$1);
-    my $sock = IO::Socket::INET->new(
-        Proto    => 'udp',
-        PeerPort => $port,
-        PeerAddr => $host,
-    ) or die "Could not create socket: $!\n";
-    $sock->send($result."\n") or die "Send error: $!\n";
-    # close($sock);
-}
-else {
-    print "--destination value not correct.\n\n";
-    &HelpMessage;
-    exit 1;
-}
+};
 
+if ($@){
+    openlog("submit_alert_event", 'cons,pid', 'user');
+    syslog('warning', $@);
+    closelog();
+}

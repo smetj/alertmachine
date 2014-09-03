@@ -15,15 +15,13 @@ modules:
             queue: alert_event
 
     funnel:
-        module: wishbone.builtin.flow.funnel
+        module: wishbone.flow.funnel
 
     validate:
-        module: wishbone.function.json
-        arguments:
-            mode: decode
+        module: wishbone.decode.json
 
     match_engine:
-        module: pyseps.sequentialmatch
+        module: wishbone.contrib.flow.sequentialmatch
         arguments:
             location: /share/alertmachine/rules/
 
@@ -42,7 +40,7 @@ modules:
             mta: localhost:25
 
     stdout:
-        module: wishbone.builtin.output.stdout
+        module: wishbone.output.stdout
         arguments:
             complete: true
 
