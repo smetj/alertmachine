@@ -21,7 +21,7 @@ modules:
         module: wishbone.decode.json
 
     match_engine:
-        module: wishbone.contrib.flow.sequentialmatch
+        module: wishbone.flow.match
         arguments:
             location: /share/alertmachine/rules/
 
